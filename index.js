@@ -13,7 +13,7 @@ function gaussCoef(sigma) {
   var a = Math.exp(0.726 * 0.726) / sigma,
       g1 = Math.exp(-a),
       g2 = Math.exp(-2 * a),
-      k = (1 - g1) * (1 - g1) / (1 + 2 * a * g1 - g2);
+      k = ((1 - g1) * (1 - g1)) / (1 + 2 * a * g1 - g2);
 
   a0 = k;
   a1 = k * (a - 1) * g1;
@@ -77,10 +77,26 @@ function convolveRGBA(src, out, line, coeff, width, height) {
       curr_src_b = (rgba >> 16) & 0xff;
       curr_src_a = (rgba >> 24) & 0xff;
 
-      curr_out_r = curr_src_r * coeff_a0 + prev_src_r * coeff_a1 + prev_out_r * coeff_b1 + prev_prev_out_r * coeff_b2;
-      curr_out_g = curr_src_g * coeff_a0 + prev_src_g * coeff_a1 + prev_out_g * coeff_b1 + prev_prev_out_g * coeff_b2;
-      curr_out_b = curr_src_b * coeff_a0 + prev_src_b * coeff_a1 + prev_out_b * coeff_b1 + prev_prev_out_b * coeff_b2;
-      curr_out_a = curr_src_a * coeff_a0 + prev_src_a * coeff_a1 + prev_out_a * coeff_b1 + prev_prev_out_a * coeff_b2;
+      curr_out_r =
+        curr_src_r * coeff_a0 +
+        prev_src_r * coeff_a1 +
+        prev_out_r * coeff_b1 +
+        prev_prev_out_r * coeff_b2;
+      curr_out_g =
+        curr_src_g * coeff_a0 +
+        prev_src_g * coeff_a1 +
+        prev_out_g * coeff_b1 +
+        prev_prev_out_g * coeff_b2;
+      curr_out_b =
+        curr_src_b * coeff_a0 +
+        prev_src_b * coeff_a1 +
+        prev_out_b * coeff_b1 +
+        prev_prev_out_b * coeff_b2;
+      curr_out_a =
+        curr_src_a * coeff_a0 +
+        prev_src_a * coeff_a1 +
+        prev_out_a * coeff_b1 +
+        prev_prev_out_a * coeff_b2;
 
       prev_prev_out_r = prev_out_r;
       prev_prev_out_g = prev_out_g;
@@ -136,10 +152,26 @@ function convolveRGBA(src, out, line, coeff, width, height) {
     coeff_a1 = coeff[3];
 
     for (j = width - 1; j >= 0; j--) {
-      curr_out_r = curr_src_r * coeff_a0 + prev_src_r * coeff_a1 + prev_out_r * coeff_b1 + prev_prev_out_r * coeff_b2;
-      curr_out_g = curr_src_g * coeff_a0 + prev_src_g * coeff_a1 + prev_out_g * coeff_b1 + prev_prev_out_g * coeff_b2;
-      curr_out_b = curr_src_b * coeff_a0 + prev_src_b * coeff_a1 + prev_out_b * coeff_b1 + prev_prev_out_b * coeff_b2;
-      curr_out_a = curr_src_a * coeff_a0 + prev_src_a * coeff_a1 + prev_out_a * coeff_b1 + prev_prev_out_a * coeff_b2;
+      curr_out_r =
+        curr_src_r * coeff_a0 +
+        prev_src_r * coeff_a1 +
+        prev_out_r * coeff_b1 +
+        prev_prev_out_r * coeff_b2;
+      curr_out_g =
+        curr_src_g * coeff_a0 +
+        prev_src_g * coeff_a1 +
+        prev_out_g * coeff_b1 +
+        prev_prev_out_g * coeff_b2;
+      curr_out_b =
+        curr_src_b * coeff_a0 +
+        prev_src_b * coeff_a1 +
+        prev_out_b * coeff_b1 +
+        prev_prev_out_b * coeff_b2;
+      curr_out_a =
+        curr_src_a * coeff_a0 +
+        prev_src_a * coeff_a1 +
+        prev_out_a * coeff_b1 +
+        prev_prev_out_a * coeff_b2;
 
       prev_prev_out_r = prev_out_r;
       prev_prev_out_g = prev_out_g;
@@ -162,7 +194,8 @@ function convolveRGBA(src, out, line, coeff, width, height) {
       curr_src_b = (rgba >> 16) & 0xff;
       curr_src_a = (rgba >> 24) & 0xff;
 
-      rgba = ((line[line_index] + prev_out_r) << 0) +
+      rgba =
+        ((line[line_index] + prev_out_r) << 0) +
         ((line[line_index + 1] + prev_out_g) << 8) +
         ((line[line_index + 2] + prev_out_b) << 16) +
         ((line[line_index + 3] + prev_out_a) << 24);
@@ -176,21 +209,24 @@ function convolveRGBA(src, out, line, coeff, width, height) {
   }
 }
 
-
 function blurRGBA(src, width, height, radius) {
   // Quick exit on zero radius
-  if (!radius) { return; }
+  if (!radius) {
+    return;
+  }
 
   // Unify input data type, to keep convolver calls isomorphic
   var src32 = new Uint32Array(src.buffer);
 
-  var out      = new Uint32Array(src32.length),
+  var out = new Uint32Array(src32.length),
       tmp_line = new Float32Array(Math.max(width, height) * 4);
 
   var coeff = gaussCoef(radius);
 
   convolveRGBA(src32, out, tmp_line, coeff, width, height, radius);
   convolveRGBA(out, src32, tmp_line, coeff, height, width, radius);
+
+  return src;
 }
 
 module.exports = blurRGBA;
